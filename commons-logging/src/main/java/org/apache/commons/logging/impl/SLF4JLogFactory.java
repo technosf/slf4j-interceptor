@@ -30,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
+import com.github.technosf.slf4.interceptor.LoggerInterceptor;
+
 /**
  * <p>
  * Concrete subclass of {@link LogFactory} which always delegates to the
@@ -171,7 +173,13 @@ public class SLF4JLogFactory extends LogFactory
         else
         {
             Log newInstance;
-            Logger slf4jLogger = LoggerFactory.getLogger(name);
+
+            /*
+             * Wrap the logger with an LoggerInterceptor
+             */
+            Logger slf4jLogger =
+                    new LoggerInterceptor(LoggerFactory.getLogger(name));
+
             if (slf4jLogger instanceof LocationAwareLogger)
             {
                 newInstance = new SLF4JLocationAwareLog(
