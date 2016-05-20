@@ -44,12 +44,12 @@ public abstract class AbstractInterceptor
     /**
      * The print stream used to print the intercepted log messages
      */
-    private static PrintStream printStream;
+    private static PrintStream PRINTSTREAM;
 
     /**
      * Intercept mode, defaulting to PASSTHROUGH
      */
-    private Mode mode = Mode.PASSTHROUGH;
+    private static Mode MODE = Mode.PASSTHROUGH;
 
 
     /**
@@ -60,7 +60,7 @@ public abstract class AbstractInterceptor
     @Override
     public final Mode getMode()
     {
-        return mode;
+        return getInterceptorMode();
     }
 
 
@@ -72,7 +72,25 @@ public abstract class AbstractInterceptor
      */
     public final void setMode(Mode mode)
     {
-        this.mode = mode;
+        setInterceptorMode(mode);
+    }
+
+
+    public static final Mode getInterceptorMode()
+    {
+        return MODE;
+    }
+
+
+    /**
+     * Sets the Interceptor mode
+     * 
+     * @param mode
+     *            the mode
+     */
+    public static final void setInterceptorMode(Mode mode)
+    {
+        MODE = mode;
     }
 
 
@@ -86,7 +104,7 @@ public abstract class AbstractInterceptor
     @Override
     public final String getFilter()
     {
-        return FILTER_REGEX;
+        return getInterceptorFilter();
     }
 
 
@@ -113,8 +131,8 @@ public abstract class AbstractInterceptor
         /*
          * Copy the message to the interceptor stream
          */
-        if (printStream != null)
-            printStream.println(msg.trim());
+        if (PRINTSTREAM != null)
+            PRINTSTREAM.println(msg.trim());
 
         return msg.matches(FILTER_REGEX);
     }
@@ -166,6 +184,17 @@ public abstract class AbstractInterceptor
     }
 
 
+    /**
+     * Returns the interceptor filter
+     * 
+     * @return the filter
+     */
+    public static final String getInterceptorFilter()
+    {
+        return FILTER_REGEX;
+    }
+
+
     /* ---------------------------------------------------------------- */
 
     /**
@@ -188,7 +217,7 @@ public abstract class AbstractInterceptor
         if (outputStream != null && !PrintStream.class.isInstance(outputStream))
             outputStream = new PrintStream(outputStream);
 
-        printStream = (PrintStream) outputStream;
+        PRINTSTREAM = (PrintStream) outputStream;
 
     }
 
@@ -204,8 +233,8 @@ public abstract class AbstractInterceptor
     @Override
     public final void intercept(LogLevel logLevel, Logger log, String msg)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor && formatAndLog(logLevel, msg)))
+        if ((MODE.logToInterceptor && formatAndLog(logLevel, msg))
+                || MODE.logToLogger)
         {
             logLevel.log(log, msg);
         }
@@ -223,9 +252,8 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, String format,
             Object arg)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, format, arg)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, format, arg)) || MODE.logToLogger)
         {
             logLevel.log(log, format, arg);
         }
@@ -243,9 +271,9 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, String format,
             Object arg1, Object arg2)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, format, arg1, arg2)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, format, arg1, arg2))
+                || MODE.logToLogger)
         {
             logLevel.log(log, format, arg1, arg2);
         }
@@ -263,9 +291,9 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, String format,
             Object... arguments)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, format, arguments)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, format, arguments))
+                || MODE.logToLogger)
         {
             logLevel.log(log, format, arguments);
         }
@@ -283,8 +311,8 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, String msg,
             Throwable t)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor && formatAndLog(logLevel, msg, t)))
+        if ((MODE.logToInterceptor && formatAndLog(logLevel, msg, t))
+                || MODE.logToLogger)
         {
             logLevel.log(log, msg, t);
         }
@@ -295,9 +323,8 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String msg)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, msg)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, msg)) || MODE.logToLogger)
         {
             logLevel.log(log, marker, msg);
         }
@@ -308,9 +335,8 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String format, Object arg)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, format, arg)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, format, arg)) || MODE.logToLogger)
         {
             logLevel.log(log, marker, format, arg);
         }
@@ -321,9 +347,9 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String format, Object arg1, Object arg2)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, format, arg1, arg2)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, format, arg1, arg2))
+                || MODE.logToLogger)
         {
             logLevel.log(log, marker, format, arg1, arg2);
         }
@@ -334,9 +360,9 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String format, Object... arguments)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, format, arguments)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, format, arguments))
+                || MODE.logToLogger)
         {
             logLevel.log(log, marker, format, arguments);
         }
@@ -347,9 +373,8 @@ public abstract class AbstractInterceptor
     public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String msg, Throwable t)
     {
-        if (mode.logToLogger
-                || (mode.logToInterceptor
-                        && formatAndLog(logLevel, msg, t)))
+        if ((MODE.logToInterceptor
+                && formatAndLog(logLevel, msg, t)) || MODE.logToLogger)
         {
             logLevel.log(log, marker, msg, t);
         }

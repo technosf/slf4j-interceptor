@@ -157,7 +157,8 @@ public class InterceptorIT
         exerciseLogger(loggerInterceptor);
 
         verify(mockLogger);
-        assertEquals(outputStream.toString(), "");
+
+        assertEquals(outputStream.toString(), msgproduced);
     }
 
 
