@@ -19,13 +19,18 @@ import org.slf4j.Logger;
 import org.slf4j.Marker;
 
 /**
- * Logging interceptor definition
+ * Definition of a logging Interceptor
+ * <p>
+ * The interceptor can be set to an operating {@code Mode}, and to filter log
+ * messages when in the <em>FILTER</em> {@code Mode}. Implementing classes
+ * provide the means to intercept the log calls
  * 
  * @author technosf
  * @since 0.0.1
  * @version 0.0.1
  */
 public interface Interceptor
+        extends Logger
 {
 
     /**
@@ -61,10 +66,59 @@ public interface Interceptor
     /**
      * The interceptor mode
      * 
-     * @return
+     * @return the mode
      */
     Mode getMode();
 
+    /* ---------------------------------------------------------------- */
+
+    /**
+     * Match all regex
+     */
+    static String REGEX_MATCH_ALL = ".*";
+
+    /**
+     * Match no regex
+     */
+    static String REGEX_MATCH_NONE = "(?!)";
+
+
+    /**
+     * Returns the filter the Interceptor should apply to determine if the
+     * message should go to the underlying logger in FILTER mode
+     * 
+     * @return the filter regex
+     */
+    String getFilter();
+
+
+    /**
+     * Sets the filter the Interceptor should be applying.
+     * <p>
+     * If the this filter string is empty or null, the match all filter should
+     * be applied
+     * 
+     * @param filterRegex
+     *            the filter regex
+     */
+    void setFilter(String filterRegex);
+
+
+    /**
+     * Filter messages from the underlying logger.
+     * <p>
+     * Return true if the message should be filtered and not be passed to the
+     * underlying logger
+     * 
+     * @param msg
+     *            the message to test in the filter
+     * @return true if this message should be filtered from the underlying
+     *         logger
+     */
+    boolean filter(String msg);
+
+
+    /* ---------------------------------------------------------------- */
 
     /**
      * SLF4J logging call analogue

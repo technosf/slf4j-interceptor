@@ -24,6 +24,7 @@ import org.slf4j.Marker;
  * 
  * @author technosf
  * @since 0.0.1
+ * @version 0.0.1
  */
 public enum LogLevel {
     TRACE(00),

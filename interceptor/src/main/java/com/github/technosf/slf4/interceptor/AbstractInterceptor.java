@@ -22,6 +22,8 @@ import org.slf4j.helpers.MessageFormatter;
 
 /**
  * Abstract implementation of Interceptor calls
+ * <p>
+ * Implements filtering at the class level
  * 
  * @author technosf
  * @since 0.0.1
@@ -30,6 +32,12 @@ import org.slf4j.helpers.MessageFormatter;
 public abstract class AbstractInterceptor
         implements Interceptor
 {
+
+    /**
+     * Filter regex with default match-all
+     */
+    private static String FILTER_REGEX = REGEX_MATCH_ALL;
+
     /**
      * Intercept mode, defaulting to PASSTHROUGH
      */
@@ -37,19 +45,22 @@ public abstract class AbstractInterceptor
 
 
     /**
-     * @param logLeve
-     * @param msg
-     * @return true if log should be filtered
+     * Sets the regex filter at the class level
+     * 
+     * @param filterRegex
+     *            the filter
      */
-    abstract boolean filter(LogLevel logLeve, String msg);
-
-
-    /**
-     * @param logLeve
-     * @param tuple
-     * @return true if log should be filtered
-     */
-    abstract boolean filter(LogLevel logLeve, FormattingTuple tuple);
+    public static final void setInterceptorFilter(String filterRegex)
+    {
+        if (filterRegex == null || filterRegex.isEmpty())
+        {
+            FILTER_REGEX = REGEX_MATCH_ALL;
+        }
+        else
+        {
+            FILTER_REGEX = filterRegex;
+        }
+    }
 
 
     /**
@@ -76,6 +87,72 @@ public abstract class AbstractInterceptor
     }
 
 
+    /* ---------------------------------------------------------------- */
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.github.technosf.slf4.interceptor.Interceptor#getFilter()
+     */
+    @Override
+    public final String getFilter()
+    {
+        return FILTER_REGEX;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.github.technosf.slf4.interceptor.Interceptor#setFilter(java.lang.String)
+     */
+    @Override
+    public final void setFilter(String filterRegex)
+    {
+        setInterceptorFilter(filterRegex);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.github.technosf.slf4.interceptor.Interceptor#filter(java.lang.String)
+     */
+    @Override
+    public final boolean filter(String msg)
+    {
+        return msg.matches(FILTER_REGEX);
+    }
+
+
+    /**
+     * Test the log message with the filter regex
+     * 
+     * @param msg
+     *            the message to test
+     * @return true if log should be filtered
+     */
+    private final boolean filter(LogLevel level, String msg)
+    {
+        return filter(msg);
+    }
+
+
+    /**
+     * Test the log message with the filter regex
+     * 
+     * @param tuple
+     *            the message to test
+     * @return true if log should be filtered
+     */
+    private final boolean filter(LogLevel level, FormattingTuple tuple)
+    {
+        return filter(tuple.getMessage());
+    }
+
+
+    /* ---------------------------------------------------------------- */
+
     /**
      * {@inheritDoc}
      *
@@ -83,7 +160,7 @@ public abstract class AbstractInterceptor
      *      org.slf4j.Logger, java.lang.String)
      */
     @Override
-    public void intercept(LogLevel logLevel, Logger log, String msg)
+    public final void intercept(LogLevel logLevel, Logger log, String msg)
     {
         if (mode.logToLogger
                 || (mode.logToInterceptor && formatAndLog(logLevel, msg)))
@@ -101,7 +178,7 @@ public abstract class AbstractInterceptor
      *      org.slf4j.Logger, java.lang.String, java.lang.Object)
      */
     @Override
-    public void intercept(LogLevel logLevel, Logger log, String format,
+    public final void intercept(LogLevel logLevel, Logger log, String format,
             Object arg)
     {
         if (mode.logToLogger
@@ -121,7 +198,7 @@ public abstract class AbstractInterceptor
      *      java.lang.Object)
      */
     @Override
-    public void intercept(LogLevel logLevel, Logger log, String format,
+    public final void intercept(LogLevel logLevel, Logger log, String format,
             Object arg1, Object arg2)
     {
         if (mode.logToLogger
@@ -141,7 +218,7 @@ public abstract class AbstractInterceptor
      *      org.slf4j.Logger, java.lang.String, java.lang.Object[])
      */
     @Override
-    public void intercept(LogLevel logLevel, Logger log, String format,
+    public final void intercept(LogLevel logLevel, Logger log, String format,
             Object... arguments)
     {
         if (mode.logToLogger
@@ -161,7 +238,7 @@ public abstract class AbstractInterceptor
      *      org.slf4j.Logger, java.lang.String, java.lang.Throwable)
      */
     @Override
-    public void intercept(LogLevel logLevel, Logger log, String msg,
+    public final void intercept(LogLevel logLevel, Logger log, String msg,
             Throwable t)
     {
         if (mode.logToLogger
@@ -173,7 +250,7 @@ public abstract class AbstractInterceptor
 
 
     @Override
-    public void intercept(LogLevel logLevel, Logger log, Marker marker,
+    public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String msg)
     {
         if (mode.logToLogger
@@ -186,7 +263,7 @@ public abstract class AbstractInterceptor
 
 
     @Override
-    public void intercept(LogLevel logLevel, Logger log, Marker marker,
+    public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String format, Object arg)
     {
         if (mode.logToLogger
@@ -199,7 +276,7 @@ public abstract class AbstractInterceptor
 
 
     @Override
-    public void intercept(LogLevel logLevel, Logger log, Marker marker,
+    public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String format, Object arg1, Object arg2)
     {
         if (mode.logToLogger
@@ -212,7 +289,7 @@ public abstract class AbstractInterceptor
 
 
     @Override
-    public void intercept(LogLevel logLevel, Logger log, Marker marker,
+    public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String format, Object... arguments)
     {
         if (mode.logToLogger
@@ -225,7 +302,7 @@ public abstract class AbstractInterceptor
 
 
     @Override
-    public void intercept(LogLevel logLevel, Logger log, Marker marker,
+    public final void intercept(LogLevel logLevel, Logger log, Marker marker,
             String msg, Throwable t)
     {
         if (mode.logToLogger
@@ -303,6 +380,7 @@ public abstract class AbstractInterceptor
         FormattingTuple tp = MessageFormatter.arrayFormat(format, arguments);
         return !filter(level, tp);
     }
+
     /* ---------------------------------------------------------------- */
 
 }

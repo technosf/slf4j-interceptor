@@ -25,10 +25,12 @@ import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.Marker;
-import org.slf4j.helpers.FormattingTuple;
 
 /**
- * An intercepting logger that wraps an actual logger
+ * An {@code Interceptor} that implements {@code Logger}, wrapping an actual
+ * logger and intercepting the flow to it.
+ * <p>
+ * This is the class used by drop-in logging implementation replacements.
  * 
  * @author technosf
  * @since 0.0.1
@@ -36,7 +38,7 @@ import org.slf4j.helpers.FormattingTuple;
  */
 public final class LoggerInterceptor
         extends AbstractInterceptor
-        implements Interceptor, Logger, Serializable
+        implements Interceptor, Serializable
 {
 
     /**
@@ -816,34 +818,6 @@ public final class LoggerInterceptor
     public void error(Marker marker, String msg, Throwable t)
     {
         intercept(ERROR, slf4jLogger, marker, msg, t);
-    }
-
-    /* ----------------------------------------------------------------
-     * 
-     * 
-     * ----------------------------------------------------------------
-     */
-
-
-    /* ----------------------------------------------------------------
-     * 
-     * 
-     * ----------------------------------------------------------------
-     */
-
-    @Override
-    boolean filter(LogLevel logLeve, String msg)
-    {
-        System.out.println(msg);
-        return true;
-    }
-
-
-    @Override
-    boolean filter(LogLevel logLeve, FormattingTuple tuple)
-    {
-        System.out.println(tuple.getMessage());
-        return true;
     }
 
 }

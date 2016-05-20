@@ -24,6 +24,13 @@ import static org.testng.Assert.assertEquals;
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
 
+/**
+ * Interceptor integration tests
+ * 
+ * @author technosf
+ * @since 0.0.1
+ * @version 0.0.1
+ */
 public class InterceptorIT
 {
     Logger mockLogger = strictMock(Logger.class);
@@ -39,6 +46,7 @@ public class InterceptorIT
         replay(mockLogger);
 
         LoggerInterceptor loggerInterceptor = new LoggerInterceptor(mockLogger);
+        loggerInterceptor.setMode(Interceptor.Mode.PASSTHROUGH);
         assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.PASSTHROUGH);
 
         exerciseLogger(loggerInterceptor);
@@ -48,7 +56,7 @@ public class InterceptorIT
 
 
     @Test
-    public void filter()
+    public void absorb()
     {
         reset(mockLogger);
         replay(mockLogger);
@@ -56,6 +64,62 @@ public class InterceptorIT
         LoggerInterceptor loggerInterceptor = new LoggerInterceptor(mockLogger);
         loggerInterceptor.setMode(Interceptor.Mode.ABSORB);
         assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.ABSORB);
+
+        exerciseLogger(loggerInterceptor);
+
+        verify(mockLogger);
+    }
+
+
+    @Test
+    public void filterAll()
+    {
+        reset(mockLogger);
+        replay(mockLogger);
+
+        LoggerInterceptor loggerInterceptor = new LoggerInterceptor(mockLogger);
+        loggerInterceptor.setMode(Interceptor.Mode.FILTER);
+        loggerInterceptor.setFilter(Interceptor.REGEX_MATCH_ALL);
+        assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.FILTER);
+        assertEquals(loggerInterceptor.getFilter(),
+                Interceptor.REGEX_MATCH_ALL);
+
+        exerciseLogger(loggerInterceptor);
+
+        verify(mockLogger);
+    }
+
+
+    @Test
+    public void filterNone()
+    {
+        reset(mockLogger);
+        exerciseLogger(mockLogger);
+        replay(mockLogger);
+
+        LoggerInterceptor loggerInterceptor = new LoggerInterceptor(mockLogger);
+        loggerInterceptor.setMode(Interceptor.Mode.FILTER);
+        loggerInterceptor.setFilter(Interceptor.REGEX_MATCH_NONE);
+        assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.FILTER);
+        assertEquals(loggerInterceptor.getFilter(),
+                Interceptor.REGEX_MATCH_NONE);
+
+        exerciseLogger(loggerInterceptor);
+
+        verify(mockLogger);
+    }
+
+
+    @Test
+    public void duplicate()
+    {
+        reset(mockLogger);
+        exerciseLogger(mockLogger);
+        replay(mockLogger);
+
+        LoggerInterceptor loggerInterceptor = new LoggerInterceptor(mockLogger);
+        loggerInterceptor.setMode(Interceptor.Mode.DUPLICATE);
+        assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.DUPLICATE);
 
         exerciseLogger(loggerInterceptor);
 
