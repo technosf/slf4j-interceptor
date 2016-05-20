@@ -11,9 +11,9 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	
-	<artifactId>slf4j-i.commons-logging</artifactId>
+	<artifactId>slf4j-i-commons-logging</artifactId>
 	<name>commons-logging</name>
-	<url>http://maven.apache.org</url>
+	<url>https://github.com/technosf/slf4j-interceptor</url>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,8 +22,9 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.github.technosf.slf4j-interceptor</groupId>
-			<artifactId>interceptor</artifactId>
+			<artifactId>slf4j-i-interceptor</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
+	<description>A drop-in  replacement for the SLF4J Commons Logging drop-in replacement.</description>
 </project>

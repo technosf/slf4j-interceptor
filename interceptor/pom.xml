@@ -11,11 +11,13 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>interceptor</artifactId>
+	<artifactId>slf4j-i-interceptor</artifactId>
 	<name>interceptor</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<url>https://github.com/technosf/slf4j-interceptor</url>
+	<description>The Interceptor that is used by the drop-in replacements for the various SLF4J logging implementation replacements to wrap their loggers. </description>
 </project>
