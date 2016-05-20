@@ -15,6 +15,9 @@
  */
 package com.github.technosf.slf4.interceptor;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.helpers.FormattingTuple;
@@ -39,28 +42,14 @@ public abstract class AbstractInterceptor
     private static String FILTER_REGEX = REGEX_MATCH_ALL;
 
     /**
+     * The print stream used to print the intercepted log messages
+     */
+    private static PrintStream printStream;
+
+    /**
      * Intercept mode, defaulting to PASSTHROUGH
      */
     private Mode mode = Mode.PASSTHROUGH;
-
-
-    /**
-     * Sets the regex filter at the class level
-     * 
-     * @param filterRegex
-     *            the filter
-     */
-    public static final void setInterceptorFilter(String filterRegex)
-    {
-        if (filterRegex == null || filterRegex.isEmpty())
-        {
-            FILTER_REGEX = REGEX_MATCH_ALL;
-        }
-        else
-        {
-            FILTER_REGEX = filterRegex;
-        }
-    }
 
 
     /**
@@ -121,12 +110,19 @@ public abstract class AbstractInterceptor
     @Override
     public final boolean filter(String msg)
     {
+        /*
+         * Copy the message to the interceptor stream
+         */
+        if (printStream != null)
+            printStream.println(msg.trim());
+
         return msg.matches(FILTER_REGEX);
     }
 
 
     /**
-     * Test the log message with the filter regex
+     * Test the log message with the filter regex and copy the message to the
+     * output printstream
      * 
      * @param msg
      *            the message to test
@@ -148,6 +144,52 @@ public abstract class AbstractInterceptor
     private final boolean filter(LogLevel level, FormattingTuple tuple)
     {
         return filter(tuple.getMessage());
+    }
+
+
+    /**
+     * Sets the regex filter at the class level
+     * 
+     * @param filterRegex
+     *            the filter
+     */
+    public static final void setInterceptorFilter(String filterRegex)
+    {
+        if (filterRegex == null || filterRegex.isEmpty())
+        {
+            FILTER_REGEX = REGEX_MATCH_ALL;
+        }
+        else
+        {
+            FILTER_REGEX = filterRegex;
+        }
+    }
+
+
+    /* ---------------------------------------------------------------- */
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.github.technosf.slf4.interceptor.Interceptor#setInterceptOutputStream(java.io.OutputStream)
+     */
+    @Override
+    public void setOutputStream(OutputStream outputStream)
+    {
+        setInterceptOutputStream(outputStream);
+    }
+
+
+    /**
+     * @param outputStream
+     */
+    public static void setInterceptOutputStream(OutputStream outputStream)
+    {
+        if (outputStream != null && !PrintStream.class.isInstance(outputStream))
+            outputStream = new PrintStream(outputStream);
+
+        printStream = (PrintStream) outputStream;
+
     }
 
 

@@ -21,6 +21,8 @@ import static org.easymock.EasyMock.strictMock;
 import static org.easymock.EasyMock.verify;
 import static org.testng.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
+
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
 
@@ -37,6 +39,15 @@ public class InterceptorIT
 
     String msg = "Test log message {}";
 
+    String msgproduced =
+            "Test log message {}\r\nTest log message {}\r\nTest log message {}\r\nTest log message {}\r\nTest log message {}\r\n"
+                    +
+                    "Test log message 1\r\nTest log message 1\r\nTest log message 1\r\nTest log message 1\r\nTest log message 1\r\n"
+                    +
+                    "Test log message 1\r\nTest log message 1\r\nTest log message 1\r\nTest log message 1\r\nTest log message 1\r\n"
+                    +
+                    "Test log message 1\r\nTest log message 1\r\nTest log message 1\r\nTest log message 1\r\nTest log message 1\r\n";
+
 
     @Test
     public void passthrough()
@@ -49,9 +60,13 @@ public class InterceptorIT
         loggerInterceptor.setMode(Interceptor.Mode.PASSTHROUGH);
         assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.PASSTHROUGH);
 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        loggerInterceptor.setOutputStream(outputStream);
+
         exerciseLogger(loggerInterceptor);
 
         verify(mockLogger);
+        assertEquals(outputStream.toString(), "");
     }
 
 
@@ -65,9 +80,13 @@ public class InterceptorIT
         loggerInterceptor.setMode(Interceptor.Mode.ABSORB);
         assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.ABSORB);
 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        loggerInterceptor.setOutputStream(outputStream);
+
         exerciseLogger(loggerInterceptor);
 
         verify(mockLogger);
+        assertEquals(outputStream.toString(), "");
     }
 
 
@@ -84,9 +103,15 @@ public class InterceptorIT
         assertEquals(loggerInterceptor.getFilter(),
                 Interceptor.REGEX_MATCH_ALL);
 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        loggerInterceptor.setOutputStream(outputStream);
+
         exerciseLogger(loggerInterceptor);
 
         verify(mockLogger);
+
+        String output = outputStream.toString();
+        assertEquals(output, msgproduced);
     }
 
 
@@ -104,9 +129,14 @@ public class InterceptorIT
         assertEquals(loggerInterceptor.getFilter(),
                 Interceptor.REGEX_MATCH_NONE);
 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        loggerInterceptor.setOutputStream(outputStream);
+
         exerciseLogger(loggerInterceptor);
 
         verify(mockLogger);
+
+        assertEquals(outputStream.toString(), msgproduced);
     }
 
 
@@ -121,9 +151,13 @@ public class InterceptorIT
         loggerInterceptor.setMode(Interceptor.Mode.DUPLICATE);
         assertEquals(loggerInterceptor.getMode(), Interceptor.Mode.DUPLICATE);
 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        loggerInterceptor.setOutputStream(outputStream);
+
         exerciseLogger(loggerInterceptor);
 
         verify(mockLogger);
+        assertEquals(outputStream.toString(), "");
     }
 
 
@@ -132,21 +166,25 @@ public class InterceptorIT
         logger.info(msg);
         logger.debug(msg);
         logger.warn(msg);
+        logger.error(msg);
         logger.trace(msg);
 
         logger.info(msg, 1);
         logger.debug(msg, 1);
         logger.warn(msg, 1);
+        logger.error(msg, 1);
         logger.trace(msg, 1);
 
         logger.info(msg, 1, 2);
         logger.debug(msg, 1, 2);
         logger.warn(msg, 1, 2);
+        logger.error(msg, 1, 2);
         logger.trace(msg, 1, 2);
 
         logger.info(msg, 1, 2, 3, 4, 5);
         logger.debug(msg, 1, 2, 3, 4, 5);
         logger.warn(msg, 1, 2, 3, 4, 5);
+        logger.error(msg, 1, 2, 3, 4, 5);
         logger.trace(msg, 1, 2, 3, 4, 5);
     }
 }

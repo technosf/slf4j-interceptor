@@ -15,6 +15,8 @@
  */
 package com.github.technosf.slf4.interceptor;
 
+import java.io.OutputStream;
+
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 
@@ -116,6 +118,17 @@ public interface Interceptor
      *         logger
      */
     boolean filter(String msg);
+
+
+    /* ---------------------------------------------------------------- */
+
+    /**
+     * Sets the output stream through which intercepted logs are pushed.
+     * 
+     * @param outputStream
+     *            the output stream
+     */
+    void setOutputStream(OutputStream outputStream);
 
 
     /* ---------------------------------------------------------------- */
