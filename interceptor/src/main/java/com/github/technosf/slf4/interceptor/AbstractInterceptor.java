@@ -23,6 +23,10 @@ import org.slf4j.Marker;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
+import com.github.technosf.slf4.interceptor.Interceptor;
+import com.github.technosf.slf4.interceptor.LogLevel;
+import com.github.technosf.slf4.interceptor.Interceptor.Mode;
+
 /**
  * Abstract implementation of Interceptor calls
  * <p>

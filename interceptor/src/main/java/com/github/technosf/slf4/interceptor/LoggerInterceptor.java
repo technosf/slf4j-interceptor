@@ -26,6 +26,8 @@ import java.io.Serializable;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 
+import com.github.technosf.slf4.interceptor.base.AbstractInterceptor;
+
 /**
  * An {@code Interceptor} that implements {@code Logger}, wrapping an actual
  * logger and intercepting the flow to it.
@@ -38,7 +40,7 @@ import org.slf4j.Marker;
  */
 public final class LoggerInterceptor
         extends AbstractInterceptor
-        implements Interceptor, Serializable
+        implements Logger, Serializable
 {
 
     /**
