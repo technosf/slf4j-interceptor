@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.technosf.slf4.interceptor;
+package com.github.technosf.slf4.interceptor.base;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -25,7 +25,6 @@ import org.slf4j.helpers.MessageFormatter;
 
 import com.github.technosf.slf4.interceptor.Interceptor;
 import com.github.technosf.slf4.interceptor.LogLevel;
-import com.github.technosf.slf4.interceptor.Interceptor.Mode;
 
 /**
  * Abstract implementation of Interceptor calls
