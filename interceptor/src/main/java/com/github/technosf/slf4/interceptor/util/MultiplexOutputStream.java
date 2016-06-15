@@ -15,29 +15,46 @@
  */
 package com.github.technosf.slf4.interceptor.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * OutStream multiplexer
+ * OutputStream Multiplexer
+ * <p>
+ * Multiplexes data on an output stream to subscribing other output streams.
  * 
- * @author technosf, Brogdan Matasaru
- * @see http://www.developer.com/java/other/article.php/757771/User-Code-
+ * @author technosf
+ * @see Inspired by Brogdan Matasaru,
+ *      http://www.developer.com/java/other/article.php/757771/User-Code-
  *      Multiplexing-Output-Streams.htm
  */
 public class MultiplexOutputStream
         extends OutputStream
 {
+
     /**
-     * 
+     * The core OutputStream from which data will be published to the
+     * subscribing streams
      */
-    private Vector<OutputStream> m_streams;
+    private final ByteArrayOutputStream publisher = new ByteArrayOutputStream();
+
+    /**
+     * The set of subscribing streams
+     */
+    private Set<OutputStream> subscribers = new HashSet<>();
+
+    /**
+     * Flags if there is output written to the publishing stream.
+     */
+    private boolean writeFlag = false;
 
 
     /**
-     * 
+     * Default constructor
      */
     public MultiplexOutputStream()
     {
@@ -45,49 +62,60 @@ public class MultiplexOutputStream
 
 
     /**
+     * Constructor for initial subscribing {@code OutputStreams}
+     * 
      * @param os
+     *            the initial subscribers
      */
-    public MultiplexOutputStream(OutputStream os)
+    public MultiplexOutputStream(OutputStream... os)
     {
-        addOutputStream(os);
+        addOutputStreams(os);
     }
 
 
     /**
-     * @return
+     * Returns the subscribing {@code OutputStream}s as an array
+     * 
+     * @return array of subscribers
      */
-    public Enumeration<OutputStream> getOutputStreams()
+    public OutputStream[] getOutputStreams()
     {
-        if (m_streams != null)
-            return m_streams.elements();
-        return null;
+        return subscribers.toArray(new OutputStream[] {});
     }
 
 
     /**
+     * Add subscribing {@code OutputStream}s
+     * 
      * @param os
+     *            the subscribers to add
+     * @return true is subscribers were added
      */
-    public void addOutputStream(OutputStream os)
+    public boolean addOutputStreams(OutputStream... os)
     {
-        if (os == null)
-            return;
-        if (m_streams == null)
-            m_streams = new Vector<OutputStream>();
-        m_streams.addElement(os);
+        return subscribers.addAll(Arrays.asList(os));
     }
 
 
     /**
+     * Removes {@code OutputStream}s from subscribers.
+     * 
      * @param os
+     *            the subscribers to remove
+     * @return true is subscribers were removed
      */
-    public void removeOutputStream(OutputStream os)
+    public boolean removeOutputStreams(OutputStream... os)
     {
-        if (m_streams != null && os != null)
-            m_streams.removeElement(os);
+        return subscribers.removeAll(Arrays.asList(os));
     }
 
 
-    /* ---------------------------------------------------------------- */
+    /* ---------------------------------------------------------------- 
+     * 
+     * OutputStream Methods
+     * 
+     * ----------------------------------------------------------------
+     */
 
     /**
      * {@inheritDoc}
@@ -97,23 +125,37 @@ public class MultiplexOutputStream
     @Override
     public void close() throws IOException
     {
-        Enumeration<OutputStream> e = getOutputStreams();
-        if (e == null)
-            return;
-        IOException ioe = null;
-        while (e.hasMoreElements())
+        int exceptions = 0;
+
+        synchronized (publisher)
+        /*
+         * Lock on publisher, so that IO operations are consistent
+         */
         {
-            try
+            for (OutputStream os : subscribers)
             {
-                e.nextElement().close();
+                try
+                {
+                    os.close();
+                }
+                catch (IOException e)
+                {
+                    exceptions++;
+                }
             }
-            catch (IOException exc)
-            {
-                ioe = exc;
-            }
+            /*
+             * Drop the subscribers
+             */
+            subscribers.clear();
         }
-        if (ioe != null)
-            throw ioe;
+
+        /*
+         * Throw one exception for all errors after all subscribers have been processed
+         */
+        if (exceptions > 0)
+            throw new IOException("Could not cleanly close " + exceptions
+                    + " OutputStreams.");
+
     }
 
 
@@ -125,23 +167,74 @@ public class MultiplexOutputStream
     @Override
     public void flush() throws IOException
     {
-        Enumeration<OutputStream> e = getOutputStreams();
-        if (e == null)
-            return;
-        IOException ioe = null;
-        while (e.hasMoreElements())
+        synchronized (publisher)
+        /*
+         * Lock on publisher, so that IO operations are consistent
+         */
         {
-            try
+            /*
+             * Copy the publisher contents to be flushed and clear the publisher
+             */
+            byte[] b = publisher.toByteArray();
+            publisher.reset();
+
+            for (OutputStream os : subscribers)
+            /*
+             * Write and flush the publisher content to the subscribers
+             */
             {
-                e.nextElement().flush();
+                if (writeFlag)
+                /*
+                 * Write only if a write operation happened previously
+                 */
+                {
+                    os.write(b);
+                }
+                os.flush();
             }
-            catch (IOException exc)
-            {
-                ioe = exc;
-            }
+
+            writeFlag = false;
         }
-        if (ioe != null)
-            throw ioe;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @throws IOException
+     * @see java.io.OutputStream#write(byte[])
+     */
+    @Override
+    public void write(byte[] b) throws IOException
+    {
+        synchronized (publisher)
+        /*
+         * Lock on publisher, so that IO operations are consistent
+         */
+        {
+            publisher.write(b);
+            writeFlag = true;
+        }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @throws IOException
+     * @see java.io.OutputStream#write(byte[], int, int)
+     */
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException
+    {
+        synchronized (publisher)
+        /*
+         * Lock on publisher, so that IO operations are consistent
+         */
+        {
+            publisher.write(b, off, len);
+            writeFlag = true;
+        }
     }
 
 
@@ -153,25 +246,13 @@ public class MultiplexOutputStream
     @Override
     public void write(int b) throws IOException
     {
-        Enumeration<OutputStream> e;
-        if ((e = getOutputStreams()) == null)
-            return;
-
-        IOException ioe = null;
-
-        while (e.hasMoreElements())
+        synchronized (publisher)
+        /*
+         * Lock on publisher, so that IO operations are consistent
+         */
         {
-            try
-            {
-                e.nextElement().write(b);
-            }
-            catch (IOException exc)
-            {
-                ioe = exc;
-            }
+            publisher.write(b);
+            writeFlag = true;
         }
-
-        if (ioe != null)
-            throw ioe;
     }
 }
