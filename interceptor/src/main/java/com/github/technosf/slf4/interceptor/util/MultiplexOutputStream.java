@@ -48,6 +48,21 @@ public class MultiplexOutputStream
     private Set<OutputStream> subscribers = new HashSet<>();
 
     /**
+     * Automatically flush output streams on writes ending with EOL char 10
+     */
+    private boolean autoFlush = false;
+
+    /**
+     * Prefix to prepend to output
+     */
+    private byte[] prefix = new byte[] {};
+
+    /**
+     * Postix to append to output
+     */
+    private byte[] postfix = new byte[] {};
+
+    /**
      * Flags if there is output written to the publishing stream.
      */
     private boolean writeFlag = false;
@@ -73,6 +88,62 @@ public class MultiplexOutputStream
     }
 
 
+    /* ----------------------------------------------------------------
+     * 
+     * Configuration setters
+     * 
+     * ----------------------------------------------------------------
+     */
+
+    /**
+     * Sets autoFlush property, causing output streams to be flushed when writes
+     * end with character 10.
+     * 
+     * @param autoFlush
+     *            true to autoflush
+     * @return this MultiplexOutputStream
+     */
+    public MultiplexOutputStream setAutoFlush(boolean autoFlush)
+    {
+        this.autoFlush = autoFlush;
+        return this;
+    }
+
+
+    /**
+     * Sets a prefix to write to output before each flush
+     * 
+     * @param prefix
+     *            value to prepend to an output buffer before writing
+     * @return this MultiplexOutputStream
+     */
+    public MultiplexOutputStream setPrefix(byte[] prefix)
+    {
+        this.prefix = prefix;
+        return this;
+    }
+
+
+    /**
+     * Sets a postfix to write to output before each flush
+     * 
+     * @param postfix
+     *            value to append to an output buffer before writing
+     * @return this MultiplexOutputStream
+     */
+    public MultiplexOutputStream setPostfix(byte[] postfix)
+    {
+        this.postfix = postfix;
+        return this;
+    }
+
+
+    /* ----------------------------------------------------------------
+     * 
+     * Consumers
+     * 
+     * ----------------------------------------------------------------
+     */
     /**
      * Returns the subscribing {@code OutputStream}s as an array
      * 
@@ -161,11 +232,13 @@ public class MultiplexOutputStream
 
     /**
      * {@inheritDoc}
+     * <p>
+     * Notify's after <em>flush</em>
      *
      * @see java.io.OutputStream#flush()
      */
     @Override
-    public void flush() throws IOException
+    public synchronized void flush() throws IOException
     {
         synchronized (publisher)
         /*
@@ -183,18 +256,23 @@ public class MultiplexOutputStream
              * Write and flush the publisher content to the subscribers
              */
             {
-                if (writeFlag)
+                if (writeFlag && b.length > 0)
                 /*
                  * Write only if a write operation happened previously
                  */
                 {
+                    if (prefix.length > 0)
+                        os.write(prefix);
                     os.write(b);
+                    if (postfix.length > 0)
+                        os.write(postfix);
                 }
                 os.flush();
             }
-
             writeFlag = false;
         }
+
+        notifyAll();
     }
 
 
@@ -214,6 +292,8 @@ public class MultiplexOutputStream
         {
             publisher.write(b);
             writeFlag = true;
+            if (b[b.length - 1] == 10 && autoFlush)
+                flush();
         }
     }
 
@@ -234,6 +314,8 @@ public class MultiplexOutputStream
         {
             publisher.write(b, off, len);
             writeFlag = true;
+            if (b[len - 1] == 10 && autoFlush)
+                flush();
         }
     }
 
@@ -253,6 +335,8 @@ public class MultiplexOutputStream
         {
             publisher.write(b);
             writeFlag = true;
+            if (b == 10 && autoFlush)
+                flush();
         }
     }
 }
