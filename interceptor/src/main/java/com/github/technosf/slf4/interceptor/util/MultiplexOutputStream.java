@@ -156,6 +156,19 @@ public class MultiplexOutputStream
 
 
     /**
+     * Is the given OutputStream a subscriber?
+     * 
+     * @param os
+     *            the output stream
+     * @return true if it's a subscriber
+     */
+    public boolean hasOutputStream(OutputStream os)
+    {
+        return subscribers.contains(os);
+    }
+
+
+    /**
      * Add subscribing {@code OutputStream}s
      * 
      * @param os
@@ -256,18 +269,28 @@ public class MultiplexOutputStream
              * Write and flush the publisher content to the subscribers
              */
             {
-                if (writeFlag && b.length > 0)
+                try
+                {
+                    if (writeFlag && b.length > 0)
+                    /*
+                     * Write only if a write operation happened previously
+                     */
+                    {
+                        if (prefix.length > 0)
+                            os.write(prefix);
+                        os.write(b);
+                        if (postfix.length > 0)
+                            os.write(postfix);
+                    }
+                    os.flush();
+                }
+                catch (IOException e)
                 /*
-                 * Write only if a write operation happened previously
+                 * Assume os is closed, remove
                  */
                 {
-                    if (prefix.length > 0)
-                        os.write(prefix);
-                    os.write(b);
-                    if (postfix.length > 0)
-                        os.write(postfix);
+                    subscribers.remove(os);
                 }
-                os.flush();
             }
             writeFlag = false;
         }
