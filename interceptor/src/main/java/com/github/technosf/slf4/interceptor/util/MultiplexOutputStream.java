@@ -18,14 +18,19 @@ package com.github.technosf.slf4.interceptor.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * OutputStream Multiplexer
  * <p>
  * Multiplexes data on an output stream to subscribing other output streams.
+ * This implementation synchronizes on {@code flush} allowing threads expecting
+ * data on subscribing output streams to wait.
  * 
  * @author technosf
  * @see Inspired by Brogdan Matasaru,
@@ -45,7 +50,8 @@ public class MultiplexOutputStream
     /**
      * The set of subscribing streams
      */
-    private Set<OutputStream> subscribers = new HashSet<>();
+    private Set<OutputStream> subscribers =
+            Collections.synchronizedSet(new HashSet<OutputStream>());
 
     /**
      * Automatically flush output streams on writes ending with EOL char 10
@@ -97,7 +103,7 @@ public class MultiplexOutputStream
 
     /**
      * Sets autoFlush property, causing output streams to be flushed when writes
-     * end with character 10.
+     * end with character 10 (LF).
      * 
      * @param autoFlush
      *            true to autoflush
@@ -177,7 +183,13 @@ public class MultiplexOutputStream
      */
     public boolean addOutputStreams(OutputStream... os)
     {
-        return subscribers.addAll(Arrays.asList(os));
+        synchronized (publisher)
+        /*
+         * Lock on publisher, so that IO operations are consistent
+         */
+        {
+            return subscribers.addAll(Arrays.asList(os));
+        }
     }
 
 
@@ -190,7 +202,13 @@ public class MultiplexOutputStream
      */
     public boolean removeOutputStreams(OutputStream... os)
     {
-        return subscribers.removeAll(Arrays.asList(os));
+        synchronized (publisher)
+        /*
+         * Lock on publisher, so that IO operations are consistent
+         */
+        {
+            return subscribers.removeAll(Arrays.asList(os));
+        }
     }
 
 
@@ -244,9 +262,11 @@ public class MultiplexOutputStream
 
 
     /**
-     * {@inheritDoc}
+     * {code flush} takes accumulated writes and pushes them onto subscribing
+     * {@code OutputStream}s.
      * <p>
-     * Notify's after <em>flush</em>
+     * <em>flush</em> is synchronous and calls {@code notifyAll} once all
+     * {@code OutputStream}s have been flushed.
      *
      * @see java.io.OutputStream#flush()
      */
@@ -258,6 +278,8 @@ public class MultiplexOutputStream
          * Lock on publisher, so that IO operations are consistent
          */
         {
+            List<OutputStream> deadStreams = new ArrayList<>(); // Container streams found dead
+
             /*
              * Copy the publisher contents to be flushed and clear the publisher
              */
@@ -286,16 +308,24 @@ public class MultiplexOutputStream
                 }
                 catch (IOException e)
                 /*
-                 * Assume os is closed, remove
+                 * Assume os is closed, add to dead list
                  */
                 {
-                    subscribers.remove(os);
+                    deadStreams.add(os);
                 }
             }
+
+            if (!deadStreams.isEmpty())
+            /*
+             * Remove dead streams
+             */
+            {
+                subscribers.remove(deadStreams);
+            }
+
             writeFlag = false;
         }
-
-        notifyAll();
+        notifyAll(); // Notify waiting threads that a flush has occured
     }
 
 
