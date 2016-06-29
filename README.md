@@ -28,7 +28,7 @@ What has been difficult is to access logging messages within the message-produci
 
 *slf4j-interceptor* can be configured with a *regex* filter - only messages that hit the *interceptor* and match on the filter will be handed on.
 
-![Logging Interception](https://github.com/technosf/slf4j-interceptor/slf4ji.png)
+![Logging Interception](https://raw.githubusercontent.com/technosf/slf4j-interceptor/master/slf4ji.png)
 
 ## Installation ##
 
