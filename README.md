@@ -1,6 +1,6 @@
 # slf4j-interceptor #
 
-Intercept log messages from *Commons Logging*, *log4j*, *java.util.logging* and *SLF4J*, and filter, duplicate or reroute them programmatically.
+Intercept log messages from *Commons Logging*, *log4j*, *java.util.logging* and *SLF4J*, and filter, duplicate or re-route them programmatically.
 
 
 ## Table of Contents ##
