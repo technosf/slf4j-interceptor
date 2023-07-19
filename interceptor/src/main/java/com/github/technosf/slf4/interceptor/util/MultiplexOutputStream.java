@@ -320,7 +320,7 @@ public class MultiplexOutputStream
              * Remove dead streams
              */
             {
-                subscribers.remove(deadStreams);
+                subscribers.removeAll(deadStreams);
             }
 
             writeFlag = false;

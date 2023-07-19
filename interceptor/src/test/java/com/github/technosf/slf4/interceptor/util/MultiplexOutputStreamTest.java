@@ -46,7 +46,7 @@ public class MultiplexOutputStreamTest //extends EasyMockSupport
     @BeforeClass
     private void beforeClass() throws IOException
     {
-        reset(osa);
+        reset((Object[]) osa);
         exercise(osa);
         replay(os1);
     }

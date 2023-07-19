@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.github.technosf.slf4j-interceptor</groupId>
 		<artifactId>slf4j-i</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>slf4j-i-interceptor</artifactId>

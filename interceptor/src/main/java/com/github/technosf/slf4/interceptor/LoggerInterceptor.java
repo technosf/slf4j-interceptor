@@ -40,7 +40,7 @@ import com.github.technosf.slf4.interceptor.base.AbstractInterceptor;
  */
 public final class LoggerInterceptor
         extends AbstractInterceptor
-        implements Logger, Serializable
+        implements Serializable
 {
 
     /**

@@ -108,7 +108,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void trace(Object message)
     {
-        logger.trace(String.valueOf(message));
+        logger.trace((String) message);
     }
 
 
@@ -124,7 +124,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void trace(Object message, Throwable t)
     {
-        logger.trace(String.valueOf(message), t);
+        logger.trace((String) message, t);
     }
 
 
@@ -138,7 +138,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void debug(Object message)
     {
-        logger.debug(String.valueOf(message));
+        logger.debug((String) message);
     }
 
 
@@ -154,7 +154,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void debug(Object message, Throwable t)
     {
-        logger.debug(String.valueOf(message), t);
+        logger.debug((String) message, t);
     }
 
 
@@ -168,7 +168,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void info(Object message)
     {
-        logger.info(String.valueOf(message));
+        logger.info((String) message);
     }
 
 
@@ -184,7 +184,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void info(Object message, Throwable t)
     {
-        logger.info(String.valueOf(message), t);
+        logger.info((String) message, t);
     }
 
 
@@ -198,7 +198,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void warn(Object message)
     {
-        logger.warn(String.valueOf(message));
+        logger.warn((String) message);
     }
 
 
@@ -214,7 +214,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void warn(Object message, Throwable t)
     {
-        logger.warn(String.valueOf(message), t);
+        logger.warn((String) message, t);
     }
 
 
@@ -228,7 +228,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void error(Object message)
     {
-        logger.error(String.valueOf(message));
+        logger.error((String) message);
     }
 
 
@@ -244,7 +244,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void error(Object message, Throwable t)
     {
-        logger.error(String.valueOf(message), t);
+        logger.error((String) message, t);
     }
 
 
@@ -258,7 +258,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void fatal(Object message)
     {
-        logger.error(String.valueOf(message));
+        logger.error((String) message);
     }
 
 
@@ -274,7 +274,7 @@ public class SLF4JLog implements Log, Serializable
     @Override
     public void fatal(Object message, Throwable t)
     {
-        logger.error(String.valueOf(message), t);
+        logger.error((String) message, t);
     }
 
 
@@ -288,7 +288,7 @@ public class SLF4JLog implements Log, Serializable
      */
     protected Object readResolve() throws ObjectStreamException
     {
-        Logger logger = LoggerFactory.getLogger(this.name);
-        return new SLF4JLog(logger);
+        Logger l = LoggerFactory.getLogger(this.name);
+        return new SLF4JLog(l);
     }
 }

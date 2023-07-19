@@ -8,11 +8,11 @@
 	<parent>
 		<groupId>com.github.technosf.slf4j-interceptor</groupId>
 		<artifactId>slf4j-i</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	
-	<artifactId>slf4j-i-commons-logging</artifactId>
-	<name>commons-logging</name>
+	<artifactId>slf4j-i-jcl</artifactId>
+	<name>jcl</name>
 	<url>https://github.com/technosf/slf4j-interceptor</url>
 	
 	<properties>
@@ -23,7 +23,13 @@
 		<dependency>
 			<groupId>com.github.technosf.slf4j-interceptor</groupId>
 			<artifactId>slf4j-i-interceptor</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>2.0.7</version>      
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<description>A drop-in  replacement for the SLF4J Commons Logging drop-in replacement.</description>

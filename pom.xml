@@ -5,7 +5,7 @@
 
 	<groupId>com.github.technosf.slf4j-interceptor</groupId>
 	<artifactId>slf4j-i</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>SLF4J Interceptor</name>
@@ -14,12 +14,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j.version>1.7.21</slf4j.version>
+		<slf4j.version>2.0.7</slf4j.version>
 	</properties>
 
 	<modules>
 		<module>interceptor</module>
-		<module>commons-logging</module>
+		<module>jcl</module>
 	</modules>
 
 	<build>
@@ -27,16 +27,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.19.1</version>
+				<version>3.1.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -59,13 +58,13 @@
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>6.9.10</version>
+			<version>7.8.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
-			<version>3.4</version>
+			<version>5.1.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
